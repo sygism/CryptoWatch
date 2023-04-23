@@ -1,0 +1,6 @@
+[{"Name": "Bitcoin", "Designator":  "BTC",
+  "Description":  "Bitcoin (BTC) is a decentralized digital currency that uses a peer-to-peer network to enable secure and transparent transactions without the need for intermediaries. It operates on a blockchain technology that allows for the creation and transfer of value without the need for centralized control. It is the first and most well-known cryptocurrency, and has a finite supply of 21 million coins."},
+  {"Name":  "Cardano", "Designator":  "ADA",
+  "Description":  "Cardano (ADA) is a decentralized blockchain platform that uses a proof-of-stake consensus algorithm. It aims to provide a secure and scalable platform for building decentralized applications and executing smart contracts. Its unique features include a layered architecture, peer-reviewed research, and a treasury system for funding development and innovation."},
+  {"Name":  "Ethereum", "Designator":  "ETH",
+  "Description":  ""}]
