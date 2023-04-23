@@ -14,8 +14,14 @@ class PriceGraph(PlotWidget):
         self.price_graph = pg.PlotWidget()
         self.price_graph.setBackground('#000000')
         self.prices_close = dataset.iloc[6].iloc[::-1]
+        print(dataset.keys)
+        self.dates = dict(enumerate(dataset.keys))
+
         pen = pg.mkPen(color="#39FF14", width=3.0)
-        price_plot = pg.PlotDataItem(np.arange(1, 16), np.array(self.prices_close[0:15], dtype=float), pen=pen)
-        self.price_graph.addItem(price_plot)
+        self.price_graph.plot(np.arange(1, len(self.prices_close) - 1),
+                                     np.array(self.prices_close[0:-2], dtype=float), pen=pen)
         self.price_graph.getPlotItem().hideAxis('left')
+        self.price_graph.setXRange(len(self.prices_close) - 30, len(self.prices_close))
+        self.price_graph.setYRange(min(self.prices_close[-32:-2]), max(self.prices_close[-32:-2]))
+
 

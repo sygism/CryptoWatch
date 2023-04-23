@@ -22,9 +22,14 @@ class PriceScraper(str):
         root_dir = '/'.join(str(__file__).split('/')[:-2])
         if os.path.exists('{0}/cache/{1}_price_data.csv'.format(root_dir, self.designator)):
             df = pd.read_csv('{0}/cache/{1}_price_data.csv'.format(root_dir, self.designator))
-            print(str(df))
             if str(date.today()) in df.keys():
                 self.df = df
+                print("Used cached value!")
+            else:
+                data, metadata = self.instance.get_digital_currency_daily(symbol=self.designator,
+                                                                          market=self.currency)
+                self.df = pd.DataFrame.from_dict(data)
+                self.df.to_csv('{0}/cache/{1}_price_data.csv'.format(root_dir, self.designator))
         else:
             data, metadata = self.instance.get_digital_currency_daily(symbol=self.designator,
                                                                       market=self.currency)
