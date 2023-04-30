@@ -1,0 +1,14 @@
+[
+  {
+    "Name": "Bitcoin",
+    "Symbol": "BTC"
+  },
+  {
+    "Name": "Cardano",
+    "Symbol": "ADA"
+  },
+  {
+    "Name": "Ethereum",
+    "Symbol": "ETH"
+  }
+]

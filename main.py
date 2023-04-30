@@ -1,11 +1,14 @@
-from PyQt6 import QtCore
-from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow, QGridLayout, QLabel
-from PyQt6.QtGui import QPalette, QColor, QFont, QIcon, QPixmap
 import sys
+from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel
+from PyQt6.QtGui import QFont, QIcon, QPixmap, QFontDatabase
 from utils.db_parser import DatabaseParser
-from widgets.search_bar import SearchBar
+from widgets.SearchBar import SearchBar
 from utils.price_scraper import PriceScraper
-from widgets.main_graph import PriceGraph
+from widgets.PriceGraph import PriceGraph
+from utils.favourites_handler import FavouritesHandler
+from utils.Currency import Currency
+from widgets.InfoBox import InfoBox
+from widgets.FavouritesListView import FavouritesListView
 
 
 class MainWindow(QMainWindow):
@@ -15,32 +18,58 @@ class MainWindow(QMainWindow):
 
         container = QWidget()
 
-        container_lout = QGridLayout()
-        container_lout.setHorizontalSpacing(0)
+        container_lout = QVBoxLayout()
         container.setLayout(container_lout)
+        self.current_currency = None
 
         self.setCentralWidget(container)
+
+        row1_container = QHBoxLayout()
         logo = QLabel()
         img = QPixmap('res/logo.png').scaled(25, 25)
         logo.setPixmap(img)
-        container_lout.addWidget(logo, 0, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+        row1_container.addWidget(logo)
         app_title = QLabel()
         app_title.setText("CryptoWatch")
         app_title.setStyleSheet(
             "color: #f5f5f5;"
             "font-size: 18px;"
         )
-        container_lout.addWidget(app_title, 0, 1, QtCore.Qt.AlignmentFlag.AlignLeft)
+        row1_container.addWidget(app_title)
+        row1_container.addStretch()
         db_parser = DatabaseParser('crypto_db.json')
-        searchbar = SearchBar(db_parser.frame)
-        container_lout.addWidget(searchbar.searchbar, 0, 2, QtCore.Qt.AlignmentFlag.AlignRight)
+        searchbar = SearchBar(db_parser.get_raw_frame())
+        row1_container.addWidget(searchbar.searchbar)
 
-        scraper = PriceScraper(('ADA', 'EUR'))
+        user_favourites = FavouritesHandler(db_parser)
+        user_currencies = user_favourites.get_currencies()
+
+        if len(user_currencies) == 0:
+            self.current_currency = Currency('Bitcoin', 'BTC', db_parser.get_description_by_symbol("BTC"))
+        else:
+            self.current_currency = Currency(user_currencies[2].get_name(), user_currencies[2].get_symbol(),
+                                             db_parser.get_description_by_symbol(user_currencies[2].get_symbol()))
+        scraper = PriceScraper(self.current_currency, 'EUR')
+
+        row2_container = QHBoxLayout()
+
+        lv = FavouritesListView(user_currencies)
+        row2_container.addLayout(lv.get_layout())
+
         graph_widget = PriceGraph(scraper.df)
+        infobox = InfoBox(self.current_currency, scraper, graph_widget)
+        row2_container.addLayout(infobox.get_layout_object())
+        row2_container.addWidget(graph_widget.get_main_graph())
 
-        container_lout.addWidget(graph_widget.price_graph, 1, 1, 2, 2, QtCore.Qt.AlignmentFlag.AlignRight)
+        container_lout.addLayout(row1_container)
+        container_lout.addLayout(row2_container)
 
-        self.setFont(QFont('Roboto-medium', 14))
+        # Import default font ('Roboto') for the application
+        e_id = QFontDatabase.addApplicationFont('res/Roboto-Medium.ttf')
+        if e_id < 0:
+            print("Error loading font!")
+
+        self.setFont(QFont(QFontDatabase.applicationFontFamilies(e_id)[0], 14))
         self.setStyleSheet("background-color: #222222;")
         self.setFixedSize(1280, 720)
         self.setWindowTitle("CryptoWatch")

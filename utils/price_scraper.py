@@ -3,16 +3,17 @@ from alpha_vantage.cryptocurrencies import CryptoCurrencies
 from dotenv import load_dotenv
 import os
 from datetime import date
+from utils.Currency import Currency
 
 
-class PriceScraper(str):
+class PriceScraper:
 
-    def __init__(self, params):
+    def __init__(self, p_coin, market):
         # Load environment variables
         load_dotenv()
         self.live_price = 0
-        self.currency = params[1]
-        self.designator = params[0]
+        self.currency = market
+        self.designator = p_coin.get_symbol()
         self.api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
         self.instance = CryptoCurrencies(key=self.api_key)
         self.df = None
@@ -24,7 +25,7 @@ class PriceScraper(str):
             df = pd.read_csv('{0}/cache/{1}_price_data.csv'.format(root_dir, self.designator))
             if str(date.today()) in df.keys():
                 self.df = df
-                print("Used cached value!")
+                print("Fetched cached value for currency: {0}".format(self.designator))
             else:
                 data, metadata = self.instance.get_digital_currency_daily(symbol=self.designator,
                                                                           market=self.currency)
@@ -37,12 +38,14 @@ class PriceScraper(str):
             self.df.to_csv('{0}/cache/{1}_price_data.csv'.format(root_dir, self.designator))
 
     def fetch_live_price(self):
-        return self.instance.get_digital_currency_exchange_rate(from_currency=self.designator,
-                                                                to_currency=self.currency)
+        price, metadata = self.instance.get_digital_currency_exchange_rate(from_currency=self.designator,
+                                                                           to_currency=self.currency)
+        return round(float(price["5. Exchange Rate"]), 3)
 
 
 if __name__ == "__main__":
-    # c_instance = PriceScraper(('BTC', 'EUR'))
+    coin = Currency('Bitcoin', 'BTC', "None")
+    c_instance = PriceScraper(coin, 'EUR')
     # print(str(c_instance.df))
     # print(str(date.today()))
     print(str('/'.join(str(__file__).split('/')[:-2])))
