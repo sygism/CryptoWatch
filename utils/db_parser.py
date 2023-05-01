@@ -13,7 +13,7 @@ class DatabaseParser(str):
         return self.frame
 
     def get_description_by_symbol(self, symbol):
-        return self.frame["Description"].where(self.frame["Designator"] == symbol)[0]
+        return self.frame["Description"].where(self.frame["Designator"] == symbol)[2]
 
 
 if __name__ == "__main__":

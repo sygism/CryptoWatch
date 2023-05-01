@@ -49,20 +49,10 @@ class MainWindow(QMainWindow):
         else:
             self.current_currency = Currency(user_currencies[2].get_name(), user_currencies[2].get_symbol(),
                                              db_parser.get_description_by_symbol(user_currencies[2].get_symbol()))
-        scraper = PriceScraper(self.current_currency, 'EUR')
-
-        row2_container = QHBoxLayout()
-
-        lv = FavouritesListView(user_currencies)
-        row2_container.addLayout(lv.get_layout())
-
-        graph_widget = PriceGraph(scraper.df)
-        infobox = InfoBox(self.current_currency, scraper, graph_widget)
-        row2_container.addLayout(infobox.get_layout_object())
-        row2_container.addWidget(graph_widget.get_main_graph())
 
         container_lout.addLayout(row1_container)
-        container_lout.addLayout(row2_container)
+        row2_container = QHBoxLayout()
+        self.update_window_with_user_currency(self.current_currency, container_lout, row2_container, user_currencies)
 
         # Import default font ('Roboto') for the application
         e_id = QFontDatabase.addApplicationFont('res/Roboto-Medium.ttf')
@@ -74,6 +64,19 @@ class MainWindow(QMainWindow):
         self.setFixedSize(1280, 720)
         self.setWindowTitle("CryptoWatch")
         self.setWindowIcon(QIcon('res/logo.png'))
+
+    def update_window_with_user_currency(self, coin, layout, container, user_currencies):
+        while container.takeAt(0) is not None:
+            container.removeItem(container.takeAt(0))
+        lv = FavouritesListView(user_currencies, self, layout, container)
+        container.addLayout(lv.get_layout())
+        scraper = PriceScraper(coin, 'EUR')
+        graph_widget = PriceGraph(scraper.df)
+        infobox = InfoBox(coin, scraper, graph_widget)
+        container.addLayout(infobox.get_layout_object())
+        container.addWidget(graph_widget.get_main_graph())
+
+        layout.addLayout(container)
 
 
 app = QApplication(sys.argv)
